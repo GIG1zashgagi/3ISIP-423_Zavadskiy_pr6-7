@@ -177,4 +177,42 @@ namespace TextRoguelike     // создаем пространство для н
             return Math.Max(1, Attack - player.GetDefense());
         }
     }
+    public class BossVvg : Goblin
+    {
+        public BossVvg(Random random) : base(random)
+        {
+            Name = "ВВГ (Босс Гоблин)";
+            Type = EnemyType.BossVvg;
+            MaxHP = (int)(MaxHP * 2.0);
+            HP = MaxHP;
+            Attack = (int)(Attack * 1.5);
+            Defense = (int)(Defense * 1.2);
+        }
+    }
+
+    public class BossKovalsky : Skeleton
+    {
+        public BossKovalsky(Random random) : base(random)
+        {
+            Name = "Ковальский (Босс Скелет)";
+            Type = EnemyType.BossKovalsky;
+            MaxHP = (int)(MaxHP * 2.5);
+            HP = MaxHP;
+            Attack = (int)(Attack * 1.3);
+            Defense = (int)(Defense * 1.4);
+        }
+    }
+
+    public class BossArchmage : Mage
+    {
+        public BossArchmage(Random random) : base(random)
+        {
+            Name = "Архимаг C++ (Босс Маг)";
+            Type = EnemyType.BossArchmage;
+            MaxHP = (int)(MaxHP * 1.8);
+            HP = MaxHP;
+            Attack = (int)(Attack * 1.6);
+            Defense = (int)(Defense * 1.1);
+        }
+    }
 }

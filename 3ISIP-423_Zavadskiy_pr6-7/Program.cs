@@ -125,4 +125,26 @@ namespace TextRoguelike     // создаем пространство для н
             return Math.Max(1, baseDamage - player.GetDefense());
         }
     }
+    public class Skeleton : Enemy
+    {
+        public Skeleton(Random random)
+        {
+            Name = "Скелет";
+            Type = EnemyType.Skeleton;
+            MaxHP = 40 + random.Next(-5, 6);
+            HP = MaxHP;
+            Attack = 6 + random.Next(-2, 3);
+            Defense = 5 + random.Next(-1, 2);
+        }
+
+        public override bool TrySpecialAbility(Player player, Random random)
+        {
+            return false; 
+        }
+
+        public override int CalculateDamage(Player player, Random random)
+        {
+            return Attack;
+        }
+    }
 }

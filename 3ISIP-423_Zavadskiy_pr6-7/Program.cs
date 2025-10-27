@@ -11,4 +11,34 @@ namespace TextRoguelike     // создаем пространство для н
             game.Start();
         }
     }
+    public enum EnemyType
+    {
+        Goblin,
+        Skeleton,
+        Mage,
+        BossVvg,
+        BossKovalsky,
+        BossArchmage,
+        BossPestov
+    }
+    public class Item
+    {
+        public string Name { get; set; }
+        public int Attack { get; set; }
+        public int Defense { get; set; }
+        public bool IsWeapon { get; set; }
+
+        public Item(string name, int attack, int defense, bool isWeapon)
+        {
+            Name = name;
+            Attack = attack;
+            Defense = defense;
+            IsWeapon = isWeapon;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} (Атака: {Attack}, Защита: {Defense})";
+        }
+    }
 }

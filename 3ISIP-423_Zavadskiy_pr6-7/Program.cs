@@ -215,4 +215,262 @@ namespace TextRoguelike     // создаем пространство для н
             Defense = (int)(Defense * 1.1);
         }
     }
+    public class BossPestov : Skeleton
+    {
+        private double freezeChance = 0.4; // 25% + 15%
+
+        public BossPestov(Random random) : base(random)
+        {
+            Name = "Пестов С-- (Босс Скелет)";
+            Type = EnemyType.BossPestov;
+            MaxHP = (int)(MaxHP * 1.3);
+            HP = MaxHP;
+            Attack = (int)(Attack * 1.8);
+            Defense = (int)(Defense * 0.6);
+        }
+
+        public override bool TrySpecialAbility(Player player, Random random)
+        {
+            if (random.NextDouble() < freezeChance)
+            {
+                Console.WriteLine("Пестов С-- замораживает вас! Вы пропустите следующий ход.");
+                player.IsFrozen = true;
+                return true;
+            }
+            return false;
+        }
+    }
+    public class Game
+    {
+        private Player player;
+        private Random random;
+        private int turnCount;
+        private List<Item> possibleItems;
+
+        public Game()
+        {
+            player = new Player();
+            random = new Random();
+            turnCount = 0;
+            InitializeItems();
+        }
+
+        private void InitializeItems()
+        {
+            possibleItems = new List<Item>
+            {
+                // Оружие
+                new Item("Стальной меч", 10, 0, true),
+                new Item("Огненный посох", 15, 0, true),
+                new Item("Лук охотника", 12, 0, true),
+                new Item("Секира варвара", 18, 0, true),
+                
+                // Доспехи
+                new Item("Кожаная броня", 0, 8, false),
+                new Item("Стальные доспехи", 0, 15, false),
+                new Item("Магический плащ", 0, 12, false),
+                new Item("Доспехи дракона", 0, 20, false)
+            };
+        }
+
+        public void Start()
+        {
+            Console.WriteLine("Добро пожаловать в текстовый рогалик!");
+            Console.WriteLine("Цель: выживать как можно дольше, побеждая врагов и улучшая экипировку.");
+            Console.WriteLine();
+
+            while (player.HP > 0)
+            {
+                turnCount++;
+                Console.WriteLine($"=== Ход {turnCount} ===");
+                Console.WriteLine(player);
+                Console.WriteLine();
+
+                // Каждые 10 ходов - босс
+                if (turnCount % 10 == 0)
+                {
+                    Console.WriteLine("!!! Появляется БОСС !!!");
+                    Enemy boss = GenerateBoss();
+                    Combat(boss);
+                }
+                else
+                {
+                    // Обычный ход: 50% шанс сундука, 50% шанс врага
+                    if (random.Next(2) == 0)
+                    {
+                        FindChest();
+                    }
+                    else
+                    {
+                        Enemy enemy = GenerateEnemy();
+                        Combat(enemy);
+                    }
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("Нажмите любую клавишу для продолжения...");
+                Console.ReadKey();
+                Console.Clear();
+            }
+
+            Console.WriteLine("Игра окончена! Вы погибли.");
+            Console.WriteLine($"Вы продержались {turnCount} ходов.");
+        }
+
+        private Enemy GenerateEnemy()
+        {
+            int enemyType = random.Next(3);
+            return enemyType switch
+            {
+                0 => new Goblin(random),
+                1 => new Skeleton(random),
+                2 => new Mage(random),
+                _ => new Goblin(random)
+            };
+        }
+
+        private Enemy GenerateBoss()
+        {
+            int bossType = random.Next(4);
+            return bossType switch
+            {
+                0 => new BossVvg(random),
+                1 => new BossKovalsky(random),
+                2 => new BossArchmage(random),
+                3 => new BossPestov(random),
+                _ => new BossVvg(random)
+            };
+        }
+        private void FindChest()
+        {
+            Console.WriteLine("Вы нашли сундук!");
+            int itemType = random.Next(3);
+
+            switch (itemType)
+            {
+                case 0: 
+                    Console.WriteLine("В сундуке лечебное зелье! Вы полностью исцелены.");
+                    player.Heal();
+                    break;
+
+                case 1:
+                case 2: 
+                    Item foundItem = possibleItems[random.Next(possibleItems.Count)];
+                    Console.WriteLine($"В сундуке: {foundItem}");
+
+                    Item currentItem = foundItem.IsWeapon ? player.Weapon : player.Armor;
+                    Console.WriteLine($"Ваш текущий предмет: {currentItem}");
+
+                    Console.WriteLine("Вы хотите взять новый предмет? (y/n)");
+                    string choice = Console.ReadLine().ToLower();
+
+                    if (choice == "y" || choice == "д")
+                    {
+                        if (foundItem.IsWeapon)
+                        {
+                            player.Weapon = foundItem;
+                            Console.WriteLine("Вы экипировали новое оружие.");
+                        }
+                        else
+                        {
+                            player.Armor = foundItem;
+                            Console.WriteLine("Вы экипировали новые доспехи.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Вы оставили предмет в сундуке.");
+                    }
+                    break;
+            }
+        }
+        private void Combat(Enemy enemy)
+        {
+            Console.WriteLine($"Вы встретили: {enemy}");
+            Console.WriteLine();
+
+            bool playerDefending = false;
+
+            while (enemy.IsAlive && player.HP > 0)
+            {
+                if (player.IsFrozen)
+                {
+                    Console.WriteLine("Вы заморожены и пропускаете ход!");
+                    player.IsFrozen = false;
+                }
+                else
+                {
+                    Console.WriteLine("Ваш ход:");
+                    Console.WriteLine("1 - Атаковать");
+                    Console.WriteLine("2 - Защищаться");
+                    Console.Write("Выберите действие: ");
+
+                    string input = Console.ReadLine();
+                    if (input == "1")
+                    {
+                        int damage = Math.Max(1, player.GetAttack() - enemy.Defense);
+                        enemy.HP -= damage;
+                        Console.WriteLine($"Вы нанесли {damage} урона {enemy.Name}.");
+                        playerDefending = false;
+                    }
+                    else if (input == "2")
+                    {
+                        Console.WriteLine("Вы готовитесь к защите.");
+                        playerDefending = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Неверный ввод, вы пропускаете ход.");
+                        playerDefending = false;
+                    }
+                }
+
+                if (!enemy.IsAlive)
+                {
+                    Console.WriteLine($"Вы победили {enemy.Name}!");
+                    break;
+                }
+
+                Console.WriteLine();
+                Console.WriteLine($"Ход {enemy.Name}:");
+
+                if (playerDefending && random.NextDouble() < 0.4)
+                {
+                    Console.WriteLine("Вы успешно уклонились от атаки!");
+                }
+                else
+                { 
+                    int damage = enemy.CalculateDamage(player, random);
+
+                    if (playerDefending)
+                    {
+                        double blockPercent = 0.7 + random.NextDouble() * 0.3; 
+                        int blockedDamage = (int)(damage * (1 - blockPercent));
+                        damage = Math.Max(0, damage - blockedDamage);
+                        Console.WriteLine($"Вы блокируете {blockedDamage} урона.");
+                    }
+
+                    player.HP -= damage;
+                    Console.WriteLine($"{enemy.Name} наносит вам {damage} урона.");
+
+                    enemy.TrySpecialAbility(player, random);
+                }
+
+                Console.WriteLine();
+                Console.WriteLine($"Ваше HP: {player.HP}/{player.MaxHP}");
+                Console.WriteLine($"HP {enemy.Name}: {enemy.HP}/{enemy.MaxHP}");
+                Console.WriteLine();
+
+                if (player.HP <= 0)
+                {
+                    Console.WriteLine("Вы погибли в бою!");
+                    break;
+                }
+
+                Console.WriteLine("Нажмите любую клавишу для продолжения боя...");
+                Console.ReadKey();
+                Console.WriteLine();
+            }
+        }
+    }
 }

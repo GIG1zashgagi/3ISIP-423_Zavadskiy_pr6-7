@@ -41,4 +41,39 @@ namespace TextRoguelike     // создаем пространство для н
             return $"{Name} (Атака: {Attack}, Защита: {Defense})";
         }
     }
+    public class Player
+    {
+        public int MaxHP { get; set; } = 100;
+        public int HP { get; set; }
+        public Item Weapon { get; set; }
+        public Item Armor { get; set; }
+        public bool IsFrozen { get; set; }
+
+        public Player()
+        {
+            HP = MaxHP;
+            Weapon = new Item("Ржавый меч", 5, 0, true);
+            Armor = new Item("Простая броня", 0, 5, false);
+        }
+
+        public int GetAttack()
+        {
+            return Weapon?.Attack ?? 0;
+        }
+
+        public int GetDefense()
+        {
+            return Armor?.Defense ?? 0;
+        }
+
+        public void Heal()
+        {
+            HP = MaxHP;
+        }
+
+        public override string ToString()
+        {
+            return $"Игрок - HP: {HP}/{MaxHP}, Атака: {GetAttack()}, Защита: {GetDefense()}";
+        }
+    }
 }

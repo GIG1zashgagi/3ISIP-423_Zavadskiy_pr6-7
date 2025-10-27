@@ -147,4 +147,34 @@ namespace TextRoguelike     // создаем пространство для н
             return Attack;
         }
     }
+    public class Mage : Enemy
+    {
+        private double freezeChance = 0.25;
+
+        public Mage(Random random)
+        {
+            Name = "Маг";
+            Type = EnemyType.Mage;
+            MaxHP = 25 + random.Next(-5, 6);
+            HP = MaxHP;
+            Attack = 10 + random.Next(-2, 3);
+            Defense = 2 + random.Next(-1, 2);
+        }
+
+        public override bool TrySpecialAbility(Player player, Random random)
+        {
+            if (random.NextDouble() < freezeChance)
+            {
+                Console.WriteLine("Маг замораживает вас! Вы пропустите следующий ход.");
+                player.IsFrozen = true;
+                return true;
+            }
+            return false;
+        }
+
+        public override int CalculateDamage(Player player, Random random)
+        {
+            return Math.Max(1, Attack - player.GetDefense());
+        }
+    }
 }

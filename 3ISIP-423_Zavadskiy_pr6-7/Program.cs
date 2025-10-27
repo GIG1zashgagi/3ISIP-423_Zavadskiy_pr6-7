@@ -76,4 +76,23 @@ namespace TextRoguelike     // создаем пространство для н
             return $"Игрок - HP: {HP}/{MaxHP}, Атака: {GetAttack()}, Защита: {GetDefense()}";
         }
     }
+    public abstract class Enemy
+    {
+        public string Name { get; set; }
+        public int HP { get; set; }
+        public int MaxHP { get; set; }
+        public int Attack { get; set; }
+        public int Defense { get; set; }
+        public EnemyType Type { get; set; }
+
+        public abstract bool TrySpecialAbility(Player player, Random random);
+        public abstract int CalculateDamage(Player player, Random random);
+
+        public bool IsAlive => HP > 0;
+
+        public override string ToString()
+        {
+            return $"{Name} - HP: {HP}/{MaxHP}, Атака: {Attack}, Защита: {Defense}";
+        }
+    }
 }
